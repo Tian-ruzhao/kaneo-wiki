@@ -14,7 +14,6 @@ import {
   SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { VersionDisplay } from "@/components/version-display";
 import { WorkspaceSwitcher } from "@/components/workspace-switcher";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -44,8 +43,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <NavSecondary />
         <TrialCard />
-        <div className="flex items-center justify-between">
-          <VersionDisplay />
+        <div className="flex items-center justify-end">
           <ThemeToggleDropdown />
         </div>
       </SidebarFooter>
