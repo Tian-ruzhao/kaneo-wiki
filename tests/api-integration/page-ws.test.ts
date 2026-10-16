@@ -361,6 +361,65 @@ describe("API integration: page WebSocket", () => {
     });
   });
 
+  it("records the editing user as updated_by after the debounce", async () => {
+    vi.stubEnv("PAGE_WS_SAVE_DEBOUNCE_MS", "50");
+    const { page } = await seedPage();
+
+    const doc = new Y.Doc();
+    const { socket, status } = await connect(`page/${page.id}`, headers, {
+      doc,
+    });
+    expect(status).toBe(101);
+    sendSyncStep1(socket, doc);
+
+    doc.getText("content").insert(0, "edited content");
+    sendDocUpdate(socket, doc);
+
+    await waitFor(async () => {
+      const [row] = await db
+        .select({ updatedBy: schema.pageTable.updatedBy })
+        .from(schema.pageTable)
+        .where(eq(schema.pageTable.id, page.id))
+        .limit(1);
+      return row?.updatedBy === member.user.id;
+    });
+
+    socket.close();
+    await waitFor(() => !hasPageRoom(page.id));
+  });
+
+  it("leaves updated_by untouched for read-only viewer updates", async () => {
+    vi.stubEnv("PAGE_WS_SAVE_DEBOUNCE_MS", "50");
+    const { page } = await seedPage();
+    const viewer = await createWorkspaceViewer(member.workspace.id);
+    const viewerHeaders = {
+      cookie: `test-session=${viewer.id}`,
+      origin: headers.origin,
+    };
+
+    const docViewer = new Y.Doc();
+    const { socket, status } = await connect(`page/${page.id}`, viewerHeaders, {
+      doc: docViewer,
+    });
+    expect(status).toBe(101);
+    sendSyncStep1(socket, docViewer);
+
+    docViewer.getText("content").insert(0, "viewer text");
+    sendDocUpdate(socket, docViewer);
+
+    // Wait past the debounce so a buggy write would have landed.
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    const [row] = await db
+      .select({ updatedBy: schema.pageTable.updatedBy })
+      .from(schema.pageTable)
+      .where(eq(schema.pageTable.id, page.id))
+      .limit(1);
+    expect(row?.updatedBy).toBeNull();
+
+    socket.close();
+    await waitFor(() => !hasPageRoom(page.id));
+  });
+
   it("drops updates from read-only sockets while still sending them state", async () => {
     vi.stubEnv("PAGE_WS_SAVE_DEBOUNCE_MS", "50");
     const { page } = await seedPage();

@@ -1,37 +1,4 @@
-<p align="center">
-  <a href="https://kaneo.app">
-    <img src="https://assets.kaneo.app/logo-text.png" alt="Kaneo's logo" width="450" />
-  </a>
-</p>
-
-<div align="center">
-
-[![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/usekaneo/kaneo/ci.yml?branch=main)](https://github.com/usekaneo/kaneo/actions)
-[![AI Policy: Human Voice](https://img.shields.io/badge/AI_Policy-Human_Voice-blue?logo=data:image%2Fsvg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij4KICA8c3R5bGU%2BCiAgICAuaWNvbiB7CiAgICAgIGZpbGw6IG5vbmU7CiAgICAgIHN0cm9rZTogIzAwMDAwMDsKICAgICAgc3Ryb2tlLXdpZHRoOiAyLjI1OwogICAgICBzdHJva2UtbGluZWNhcDogcm91bmQ7CiAgICAgIHN0cm9rZS1saW5lam9pbjogcm91bmQ7CiAgICB9CiAgICBAbWVkaWEgKHByZWZlcnMtY29sb3Itc2NoZW1lOiBkYXJrKSB7CiAgICAgIC5pY29uIHsgc3Ryb2tlOiAjZmZmZmZmOyB9CiAgICB9CiAgPC9zdHlsZT4KICA8cGF0aCBjbGFzcz0iaWNvbiIgZD0iTTE5LjQxNCAxNC40MTRDMjEgMTIuODI4IDIyIDExLjUgMjIgOS41YTUuNSA1LjUgMCAwIDAtOS41OTEtMy42NzYuNi42IDAgMCAxLS44MTguMDAxQTUuNSA1LjUgMCAwIDAgMiA5LjVjMCAyLjMgMS41IDQgMyA1LjVsNS41MzUgNS4zNjJhMiAyIDAgMCAwIDIuODc5LjA1MiAyLjEyIDIuMTIgMCAwIDAtLjAwNC0zIDIuMTI0IDIuMTI0IDAgMSAwIDMtMyAyLjEyNCAyLjEyNCAwIDAgMCAzLjAwNCAwIDIgMiAwIDAgMCAwLTIuODI4bC0xLjg4MS0xLjg4MmEyLjQxIDIuNDEgMCAwIDAtMy40MDkgMGwtMS43MSAxLjcxYTIgMiAwIDAgMS0yLjgyOCAwIDIgMiAwIDAgMSAwLTIuODI4bDIuODIzLTIuNzYyIi8%2BCjwvc3ZnPgo%3D)](https://github.com/usekaneo/kaneo/blob/main/AI_POLICY.md)
-[![Discord](https://img.shields.io/discord/1326250681530843178?color=7389D8&label=&logo=discord&logoColor=ffffff)](https://discord.gg/rU4tSyhXXU)
-[![Sponsors](https://img.shields.io/github/sponsors/andrejsshell)](https://github.com/sponsors/andrejsshell)
-</div>
-
-<div align="center">
-  <h3>
-    <a href="https://cloud.kaneo.app">Cloud</a>
-    <span> | </span>
-    <a href="https://kaneo.app/docs/core/installation">Installation</a>
-    <span> | </span>
-    <a href="https://kaneo.app">Website</a>
-    <span> | </span>
-    <a href="https://discord.gg/rU4tSyhXXU">Discord</a>
-  </h3>
-</div>
-
-<p align="center">
-  Fast, simple, open-source project management.
-</p>
-
-<p align="center">
-  <img src="screenshots/readme@1x.png" srcset="screenshots/readme@1x.png 1x, screenshots/readme.png 2x" alt="Kaneo project board with the Kaneo logo and tagline" />
-</p>
+# Kaneo
 
 ## 关于本项目
 
@@ -42,52 +9,77 @@
 - **富文本编辑**：斜杠命令菜单、图片粘贴/拖放上传（需要配置 S3 兼容存储）、可选择行列数的表格、单元格框选与合并拆分、文字颜色与背景高亮。
 - **权限**：页面读写沿用任务的权限规则，只读成员只能查看，不能编辑。
 
-## Built for your team's work
+## Docker 部署
 
-- **See work your way:** Board, List, Calendar, and Gantt views, plus a backlog, filters, and search.
-- **Keep task context together:** descriptions, attachments, subtasks, dependencies, labels, comments, and time tracking.
-- **Work with your team:** shared workspaces, invitations, custom roles, live updates, and public project views.
-- **Shape your workflow:** custom columns and fields, with rules that move tasks when repository activity changes.
-- **Stay informed:** in-app notifications, email, ntfy, Gotify, and personal webhooks.
-- **Connect other tools:** GitHub and Gitea, chat integrations, project webhooks, a [REST API](https://kaneo.app/docs/api-reference/introduction), a [command-line client](https://kaneo.app/docs/cli), and [MCP](https://kaneo.app/docs/core/integrations/mcp) for AI assistants.
+> 注意：`compose.yml` 默认拉取的是上游镜像 `ghcr.io/usekaneo/kaneo`，其中**不包含**本仓库新增的文档功能。要使用文档功能，请从本仓库源码构建镜像。
 
-## Installation
+### 1. 准备环境变量
 
-- **Cloud:** [Get started with Kaneo Cloud](https://cloud.kaneo.app).
-- **Self-hosted:** Follow the [installation guide](https://kaneo.app/docs/core/installation).
+```bash
+cp .env.sample .env
+```
 
-## Contributing
+至少修改以下变量（`.env` 已被 `.gitignore` 排除，不会被提交）：
 
-Code, translations, documentation, and bug reports are welcome. Start with the [contributing guide](CONTRIBUTING.md) and [local development setup](ENVIRONMENT_SETUP.md). Pay particular attention to [contribution eligibility](https://github.com/usekaneo/kaneo/blob/main/CONTRIBUTING.md#contribution-eligibility).
+| 变量 | 说明 |
+| --- | --- |
+| `KANEO_CLIENT_URL` | 浏览器访问的地址，例如 `http://localhost:5173`。必须与浏览器中的地址完全一致。 |
+| `POSTGRES_PASSWORD` | 数据库密码（必填，除非你改用 `DATABASE_URL`）。 |
+| `AUTH_SECRET` | 认证密钥，至少 32 位。可用 `openssl rand -hex 32` 生成，生成后保持不变。 |
 
-Join us on [Discord](https://discord.gg/rU4tSyhXXU), report bugs in [GitHub Issues](https://github.com/usekaneo/kaneo/issues), or submit and vote on feature requests at [Kaneo Feedback](https://feedback.kaneo.app).
+可选变量：
 
-## Sponsors
+- **图片上传**：`S3_ENDPOINT`、`S3_BUCKET`、`S3_ACCESS_KEY_ID`、`S3_SECRET_ACCESS_KEY` 等。文档中的图片和任务附件都需要 S3 兼容存储（如 Silo、MinIO），未配置时上传会返回 503。
+- **多实例协同**：`REDIS_URL`。单实例无需 Redis。
 
-Kaneo is open source. If you find it useful, consider [sponsoring the project](https://github.com/sponsors/andrejsshell) to help support ongoing development.
+### 2. 构建镜像
 
-### Partners
+在仓库根目录执行：
 
-<p>
-  <img src="apps/site/public/images/blacksmith-powered.png" alt="CI powered by Blacksmith" width="368" />
-</p>
+```bash
+docker build -f Dockerfile.kaneo -t kaneo-wiki:local .
+```
 
-This project is tested with BrowserStack.
+### 3. 使用 Compose 启动
 
-### Community sponsors
+`compose.override.yml` 已被 `.gitignore` 排除，适合放本地覆盖配置。在仓库根目录创建该文件，让 Compose 使用刚构建的镜像：
 
-<!-- sponsors --><a href="https://github.com/danielsada"><img src="https:&#x2F;&#x2F;github.com&#x2F;danielsada.png" width="60px" alt="User avatar: Daniel Sada" /></a><a href="https://github.com/randoneering"><img src="https:&#x2F;&#x2F;github.com&#x2F;randoneering.png" width="60px" alt="User avatar: (justin)randoneering" /></a><a href="https://github.com/barbanet"><img src="https:&#x2F;&#x2F;github.com&#x2F;barbanet.png" width="60px" alt="User avatar: Damián Culotta" /></a><a href="https://github.com/ryanilano"><img src="https:&#x2F;&#x2F;github.com&#x2F;ryanilano.png" width="60px" alt="User avatar: Ryan Ilano" /></a><a href="https://github.com/bojanmilevski"><img src="https:&#x2F;&#x2F;github.com&#x2F;bojanmilevski.png" width="60px" alt="User avatar: Bojan Milevski" /></a><!-- sponsors -->
+```yaml
+services:
+  kaneo:
+    image: kaneo-wiki:local
+```
 
-## License
+然后启动：
 
-MIT License - see [LICENSE](LICENSE) for details.
+```bash
+docker compose up -d
+```
 
----
+Compose 会同时启动 PostgreSQL（`postgres:16-alpine`，数据保存在 `postgres_data` 卷中）和应用。
 
-<div align="center">
-  <img src="https://repobeats.axiom.co/api/embed/3e8367ec2b2350e4fc48662df33c81dac657b833.svg" alt="Repobeats analytics image" />
-</div>
+### 4. 访问与首次使用
 
-<p align="center">
-  Built with ❤️ by the Kaneo team and <a href="https://github.com/usekaneo/kaneo/graphs/contributors">contributors</a>
-</p>
+- 打开 `KANEO_CLIENT_URL`（默认 http://localhost:5173）。
+- 健康检查：`curl http://localhost:5173/api/health`。
+- 第一个非访客账号会完成实例初始化，请在初始化前保持实例不对外开放。
+
+### 5. 常用命令
+
+```bash
+docker compose logs -f kaneo   # 查看应用日志
+docker compose down            # 停止（保留数据）
+docker compose down -v         # 停止并删除数据库卷（会丢失所有数据）
+```
+
+### 常见问题
+
+- **浏览器请求失败或 CORS 报错**：检查 `KANEO_CLIENT_URL` 是否与浏览器地址完全一致。
+- **实时协同不同步**：如果前面还有反向代理，必须转发 WebSocket 升级头（`Upgrade` 与 `Connection`），并将 `/api/` 路径转发到容器。
+- **图片上传 503**：未配置 S3 兼容存储，见上文。
+
+## 许可证
+
+本仓库：Apache License 2.0，见 [LICENSE](LICENSE)。
+
+原项目（usekaneo/kaneo）：MIT License，原文见 [LICENSE-MIT](LICENSE-MIT)。

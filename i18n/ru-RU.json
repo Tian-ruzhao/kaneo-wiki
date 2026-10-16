@@ -4058,6 +4058,10 @@
 			"red": "Red",
 			"restoreDefault": "Reset to default",
 			"yellow": "Yellow"
+		},
+		"meta": {
+			"edited": "{{name}} edited {{date}}",
+			"editedNoName": "Edited {{date}}"
 		}
 	}
 }

@@ -606,4 +606,71 @@ describe("DocsEditor", () => {
       /\.docs-body-editor \.ProseMirror \.selectedCell:after\s*\{[^}]*background:/,
     );
   });
+
+  it("renders a large title with the meta line directly below it", async () => {
+    const ydoc = new Y.Doc();
+    const view = render(
+      <DocsEditor
+        page={makePage({
+          title: "Big title",
+          updatedAt: "2026-10-16T14:28:00.000Z",
+          updatedBy: { id: "user-1", name: "Ada" },
+        })}
+        canEdit={true}
+        ydoc={ydoc}
+        onRenameTitle={() => {}}
+      />,
+    );
+    try {
+      await waitFor(() =>
+        expect(view.container.querySelector(".ProseMirror")).not.toBeNull(),
+      );
+      const title = view.container.querySelector(
+        'input[aria-label="docs:tree.rename"]',
+      );
+      expect(title).not.toBeNull();
+      if (!title) throw new Error("title input missing");
+      // The shared Input put its text sizing on a wrapper span, which shrank
+      // the title; the header now uses a plain input with large type.
+      expect(title.className).toContain("text-4xl");
+      expect(title.className).toContain("font-bold");
+      // Meta line sits directly below the title, before the body editor.
+      const meta = title.nextElementSibling;
+      expect(meta?.textContent).toContain("docs:meta.edited");
+      const body = view.container.querySelector(".kaneo-tiptap-shell");
+      if (!meta || !body) throw new Error("meta line or body missing");
+      expect(
+        title.compareDocumentPosition(meta) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+      expect(
+        meta.compareDocumentPosition(body) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+    } finally {
+      view.unmount();
+    }
+  });
+
+  it("hides the meta line until the API provides editor or date", async () => {
+    const ydoc = new Y.Doc();
+    const view = render(
+      <DocsEditor
+        page={makePage({ updatedBy: null })}
+        canEdit={true}
+        ydoc={ydoc}
+        onRenameTitle={() => {}}
+      />,
+    );
+    try {
+      await waitFor(() =>
+        expect(view.container.querySelector(".ProseMirror")).not.toBeNull(),
+      );
+      // makePage has no updatedAt, and updatedBy is null, so no meta line.
+      expect(view.container.textContent).not.toContain("docs:meta.edited");
+      expect(view.container.textContent).not.toContain(
+        "docs:meta.editedNoName",
+      );
+    } finally {
+      view.unmount();
+    }
+  });
 });

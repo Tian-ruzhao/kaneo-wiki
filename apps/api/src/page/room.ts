@@ -61,6 +61,9 @@ export type PageClient = {
   // Read-only sockets receive sync state and awareness but their document
   // changes are dropped (see handleBinaryBytes).
   canEdit: boolean;
+  // Authenticated user behind this socket; recorded as updated_by when an
+  // edit from this client changes the document.
+  userId: string;
 };
 
 function readInnerSyncType(bytes: Uint8Array): number | null {
@@ -85,6 +88,9 @@ type PageRoom = {
   doc: Y.Doc;
   clients: Set<PageClient>;
   saveTimer: ReturnType<typeof setTimeout> | null;
+  // User behind the most recent document change from an editing client.
+  // Persisted as page.updated_by alongside yjs_state.
+  lastEditorUserId: string | null;
 };
 
 const rooms = new Map<string, PageRoom>();
@@ -163,6 +169,9 @@ async function persistRoom(room: PageRoom): Promise<void> {
         yjsState: Buffer.from(state),
         contentMarkdown: plainText || null,
         updatedAt: new Date(),
+        ...(room.lastEditorUserId !== null
+          ? { updatedBy: room.lastEditorUserId }
+          : {}),
       })
       .where(eq(pageTable.id, room.pageId));
   } catch (error) {
@@ -258,9 +267,23 @@ async function loadRoom(pageId: string): Promise<PageRoom> {
     doc,
     clients: new Set(),
     saveTimer: null,
+    lastEditorUserId: null,
   };
 
   doc.on("update", (update: Uint8Array, origin: unknown) => {
+    // Attribute document changes to the editing client that produced them.
+    // Read-only clients never reach here (their updates are dropped before
+    // touching the doc) and the Redis relay origin carries no user.
+    if (
+      typeof origin === "object" &&
+      origin !== null &&
+      "canEdit" in origin &&
+      "userId" in origin &&
+      (origin as PageClient).canEdit === true &&
+      typeof (origin as PageClient).userId === "string"
+    ) {
+      room.lastEditorUserId = (origin as PageClient).userId;
+    }
     const encoder = encoding.createEncoder();
     encoding.writeVarUint(encoder, messageSync);
     syncProtocol.writeUpdate(encoder, update);

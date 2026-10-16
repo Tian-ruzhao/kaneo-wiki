@@ -1219,6 +1219,10 @@ export const pageTable = pgTable(
       onDelete: "set null",
       onUpdate: "cascade",
     }),
+    updatedBy: text("updated_by").references(() => userTable.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
     createdAt: timestamp("created_at", { mode: "date" })
       .default(utcNow)
       .notNull(),

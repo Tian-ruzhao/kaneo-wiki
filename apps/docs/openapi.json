@@ -2305,6 +2305,25 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "updatedBy": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ],
+            "description": "Last editor of the page (title/metadata or collaborative content), or null when unknown."
           }
         },
         "required": [
@@ -2314,7 +2333,8 @@
           "title",
           "position",
           "createdAt",
-          "updatedAt"
+          "updatedAt",
+          "updatedBy"
         ]
       },
       "DeletePageResult": {

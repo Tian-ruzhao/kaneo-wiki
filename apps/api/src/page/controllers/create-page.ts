@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
-import { pageTable, projectTable } from "../../database/schema";
+import { pageTable, projectTable, userTable } from "../../database/schema";
 import { toPublicPage } from "../response";
 import { assertPageProjectAccess } from "./access";
 
@@ -47,6 +47,7 @@ async function createPage(
       parentId,
       title: input.title ?? "",
       createdBy: userId,
+      updatedBy: userId,
     })
     .returning();
 
@@ -54,7 +55,13 @@ async function createPage(
     throw new HTTPException(500, { message: "Failed to create page" });
   }
 
-  return toPublicPage(created);
+  const [editor] = await db
+    .select({ name: userTable.name })
+    .from(userTable)
+    .where(eq(userTable.id, userId))
+    .limit(1);
+
+  return toPublicPage({ ...created, updatedByName: editor?.name ?? null });
 }
 
 export default createPage;
