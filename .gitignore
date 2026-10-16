@@ -1,0 +1,69 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Local env files (may hold database passwords, auth secrets, storage keys)
+.env
+.env.*
+!.env.sample
+
+# Credentials and keys
+*.key
+*.p12
+*.pfx
+.npmrc
+credentials.json
+
+# Testing
+coverage
+logs/
+browserstack-artifacts/
+
+# Turbo
+.turbo
+
+# Vercel
+.vercel
+
+# Build Outputs
+.next/
+out/
+build
+dist
+.source
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Misc
+.DS_Store
+*.pem
+
+# DB
+*.db
+
+# Cache
+.cache/
+
+# Local worktrees
+.worktrees/
+
+# Overrides
+compose.override.yml
+
+# IntelliJ IDE
+.idea
+
+# TanStack Router generated cache
+apps/web/.tanstack/
+.pi/
+.superpowers/
+
+# TypeScript incremental build state
+*.tsbuildinfo
+.vitest/

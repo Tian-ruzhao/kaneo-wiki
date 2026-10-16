@@ -1,0 +1,68 @@
+---
+title: "GitHub troubleshooting"
+description: "Find why repository connection, issue sync, or status changes stopped working."
+---
+
+Start with the connection shown under **Settings → Projects → your project → Integrations → GitHub**. Then check the matching symptom below.
+
+## The repository is missing or verification fails
+
+Open [GitHub App installations](https://github.com/settings/installations) and check that the app is installed on the correct account or organization. Add the specific repository to its allowed repositories if needed.
+
+Confirm the owner and repository name in Kaneo. An organization owner may need to approve the installation or permission changes.
+
+## Credentials changed, but Kaneo still fails
+
+Update the instance's [GitHub environment variables](/core/installation/environment-variables#github-integration), then recreate the application container:
+
+```bash
+docker compose up -d --force-recreate kaneo
+docker compose logs --tail=100 kaneo
+```
+
+A plain container restart does not reload `.env`. Check the app ID, webhook secret, and private key format. For PEM formatting problems, use `GITHUB_PRIVATE_KEY_BASE64` with the encoded full key. Do not paste the private key or secret into a support issue.
+
+## GitHub events never arrive
+
+The webhook URL for the bundled deployment is:
+
+```text
+https://kaneo.example.com/api/github-integration/webhook
+```
+
+In the GitHub App settings, open **Advanced** and inspect recent deliveries. Check the response code and body for the failing event.
+
+- A connection error points to DNS, TLS, firewall, or proxy configuration.
+- A `404` can mean the proxy dropped `/api` or the webhook path is wrong.
+- A signature error means the webhook secret may differ between GitHub and Kaneo.
+
+After correcting the cause, redeliver the failed event in GitHub and check the result in Kaneo.
+
+## Tasks or issues do not sync
+
+Check that the app has the permissions and event subscriptions in [GitHub App setup](/core/integrations/github/setup). After changing permissions, accept the installation update in GitHub.
+
+Create one test task, then one test issue in the connected repository. Check the API logs and webhook delivery for each direction separately. Creating a task exercises Kaneo's outgoing GitHub credentials; creating an issue exercises GitHub's incoming webhook path.
+
+For existing issues, use **Import Issues**. If an import stops, return to the integration settings and choose **Resume import**. See [import behavior](/core/integrations/github/configuration#import-existing-issues) before starting another run.
+
+## Branches and pull requests do not move tasks
+
+Check the branch naming pattern in the project's integration settings. The default is `{slug}-{number}`, for example `web-22` for task `WEB-22`.
+
+Then check:
+
+1. The app can read pull requests and repository contents.
+2. Push and pull-request events are subscribed and arriving.
+3. **Workflow → Automations** maps the event to the intended column.
+4. The task is eligible for the transition. A completed task only moves for new work: a branch or pull request that is not yet linked to it.
+
+Try one branch push and inspect its webhook delivery before testing another event.
+
+## Labels look different
+
+Kaneo uses reserved labels such as `priority:high` and `status:in-progress`. Check their spelling and the Issues write permission. Ordinary labels are separate from these reserved status and priority labels.
+
+## Ask for help
+
+Include the Kaneo version, the event that failed, its delivery status, and a redacted error from the API logs in a [GitHub issue](https://github.com/usekaneo/kaneo/issues). Do not include credentials or private issue content.
