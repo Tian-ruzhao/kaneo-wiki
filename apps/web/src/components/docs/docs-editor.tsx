@@ -39,9 +39,9 @@ import {
 } from "@/components/editor/slash-menu";
 import { useEditorHighlighter } from "@/components/editor/use-editor-highlighter";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { SHIKI_CODEBLOCK_REFRESH_META } from "@/components/task/extensions/shiki-code-block";
 import { DocsImage } from "./extensions/docs-image";
+import { DocsPageMeta } from "./docs-page-meta";
 import { DocsTableToolbar } from "./docs-table-toolbar";
 import { DocsTextColorPicker } from "./docs-text-color-picker";
 import {
@@ -631,7 +631,10 @@ export function DocsEditor({
 
   return (
     <div className="mx-auto w-full max-w-[720px] px-4 py-8 sm:px-8">
-      <Input
+      {/* Plain input on purpose: the shared Input renders its text sizing on
+          a wrapper, which shrank the title. This keeps the rename behaviour
+          (blur/Enter commits, Escape reverts, read-only for viewers). */}
+      <input
         value={title}
         readOnly={!canEdit}
         aria-label={t("docs:tree.rename")}
@@ -650,8 +653,9 @@ export function DocsEditor({
             (event.target as HTMLInputElement).blur();
           }
         }}
-        className="h-auto border-0 bg-transparent px-0 font-semibold text-3xl shadow-none focus-visible:ring-0"
+        className="h-auto w-full border-0 bg-transparent px-0 font-bold text-4xl tracking-tight shadow-none outline-none placeholder:text-muted-foreground/70 focus-visible:ring-0"
       />
+      <DocsPageMeta updatedBy={page.updatedBy} updatedAt={page.updatedAt} />
       <div
         ref={bodyEditorRef}
         className={cn(
@@ -942,7 +946,8 @@ export function DocsEditor({
 export function DocsEditorLoading() {
   return (
     <div className="mx-auto w-full max-w-[720px] px-4 py-8 sm:px-8">
-      <div className="h-9 w-2/3 animate-pulse rounded-md bg-muted" />
+      <div className="h-10 w-2/3 animate-pulse rounded-md bg-muted" />
+      <div className="mt-2 h-4 w-44 animate-pulse rounded bg-muted" />
       <div className="mt-6 space-y-3">
         <div className="h-4 w-full animate-pulse rounded bg-muted" />
         <div className="h-4 w-11/12 animate-pulse rounded bg-muted" />

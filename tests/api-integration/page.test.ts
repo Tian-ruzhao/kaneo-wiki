@@ -482,4 +482,121 @@ describe("API integration: pages", () => {
       expect(persisted?.title).toBe("Keep me");
     });
   });
+
+  it("tracks the last editor across create, update, and list", async () => {
+    const member = await createWorkspaceMember({ userName: "Creator One" });
+    const editorId = `user-editor-${randomUUID()}`;
+    const [editor] = await db
+      .insert(schema.userTable)
+      .values({
+        id: editorId,
+        email: `${editorId}@example.com`,
+        emailVerified: true,
+        name: "Editor Two",
+      })
+      .returning();
+    await db.insert(schema.workspaceUserTable).values({
+      workspaceId: member.workspace.id,
+      userId: editor.id,
+      role: "member",
+      joinedAt: new Date(),
+    });
+    const { project } = await createProjectFixture({
+      workspaceId: member.workspace.id,
+    });
+    mockAuthenticatedSession(member.user);
+    const { app } = createApp();
+
+    // Create sets updatedBy to the creator.
+    const created = await createPageViaApi(app, {
+      projectId: project.id,
+      title: "Tracked",
+    });
+    expect(created.status).toBe(200);
+    expect(await created.json()).toMatchObject({
+      updatedBy: { id: member.user.id, name: member.user.name },
+    });
+
+    // PUT title by another editor changes updatedBy to that editor.
+    mockAuthenticatedSession(editor);
+    const page = (await (
+      await app.request(`/api/page/project/${project.id}`, { method: "GET" })
+    ).json()) as { pages: Array<{ id: string }> };
+    const updated = await app.request(`/api/page/${page.pages[0].id}`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ title: "Retitled" }),
+    });
+    expect(updated.status).toBe(200);
+    expect(await updated.json()).toMatchObject({
+      updatedBy: { id: editor.id, name: editor.name },
+    });
+
+    // List returns updatedBy { id, name } for every page.
+    const listed = await app.request(`/api/page/project/${project.id}`, {
+      method: "GET",
+    });
+    expect(listed.status).toBe(200);
+    const payload = (await listed.json()) as {
+      pages: Array<{ id: string; updatedBy: { id: string; name: string } }>;
+    };
+    expect(payload.pages).toHaveLength(1);
+    expect(payload.pages[0].updatedBy).toEqual({
+      id: editor.id,
+      name: editor.name,
+    });
+  });
+
+  it("returns null updatedBy after the editing user is deleted", async () => {
+    const member = await createWorkspaceMember({ userName: "Creator One" });
+    const editorId = `user-editor-${randomUUID()}`;
+    const [editor] = await db
+      .insert(schema.userTable)
+      .values({
+        id: editorId,
+        email: `${editorId}@example.com`,
+        emailVerified: true,
+        name: "Editor Two",
+      })
+      .returning();
+    await db.insert(schema.workspaceUserTable).values({
+      workspaceId: member.workspace.id,
+      userId: editor.id,
+      role: "member",
+      joinedAt: new Date(),
+    });
+    const { project } = await createProjectFixture({
+      workspaceId: member.workspace.id,
+    });
+    mockAuthenticatedSession(member.user);
+    const { app } = createApp();
+
+    const created = await createPageViaApi(app, {
+      projectId: project.id,
+      title: "Orphaned",
+    });
+    const page = (await created.json()) as { id: string };
+
+    mockAuthenticatedSession(editor);
+    const updated = await app.request(`/api/page/${page.id}`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ title: "Edited" }),
+    });
+    expect(updated.status).toBe(200);
+
+    // Removing the editor row fires ON DELETE SET NULL on page.updated_by.
+    await db.delete(schema.userTable).where(eq(schema.userTable.id, editor.id));
+
+    mockAuthenticatedSession(member.user);
+    const listed = await app.request(`/api/page/project/${project.id}`, {
+      method: "GET",
+    });
+    expect(listed.status).toBe(200);
+    const payload = (await listed.json()) as {
+      pages: Array<{ id: string; updatedBy: unknown }>;
+    };
+    expect(payload.pages).toHaveLength(1);
+    expect(payload.pages[0]).toMatchObject({ id: page.id, updatedBy: null });
+  });
 });

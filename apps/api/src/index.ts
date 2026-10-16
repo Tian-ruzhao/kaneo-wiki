@@ -953,7 +953,7 @@ export function createApp() {
 
       return {
         onOpen(_evt, ws) {
-          client = { ws, canEdit };
+          client = { ws, canEdit, userId };
           addPageClient(room, client);
           // The newcomer syncs off the server state; later updates relay
           // through the room's document listener.
@@ -961,7 +961,7 @@ export function createApp() {
         },
         onMessage(evt, ws) {
           if (!client) {
-            client = { ws, canEdit };
+            client = { ws, canEdit, userId };
             addPageClient(room, client);
           }
           handlePageSocketMessage(room, client, evt);

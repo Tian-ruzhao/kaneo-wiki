@@ -10,6 +10,13 @@ export const pageSchema = z
     position: z.number().int(),
     createdAt: responseTimestamp,
     updatedAt: responseTimestamp,
+    updatedBy: z
+      .object({ id: z.string(), name: z.string() })
+      .nullable()
+      .openapi({
+        description:
+          "Last editor of the page (title/metadata or collaborative content), or null when unknown.",
+      }),
   })
   .openapi("Page");
 
@@ -50,7 +57,8 @@ export type PublicPageRow = Pick<
   | "position"
   | "createdAt"
   | "updatedAt"
->;
+  | "updatedBy"
+> & { updatedByName: string | null };
 
 export function toPublicPage(page: PublicPageRow) {
   return {
@@ -61,5 +69,9 @@ export function toPublicPage(page: PublicPageRow) {
     position: page.position,
     createdAt: page.createdAt,
     updatedAt: page.updatedAt,
+    updatedBy:
+      page.updatedBy && page.updatedByName
+        ? { id: page.updatedBy, name: page.updatedByName }
+        : null,
   };
 }

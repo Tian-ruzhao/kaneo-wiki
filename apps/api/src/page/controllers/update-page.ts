@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
-import { pageTable, projectTable } from "../../database/schema";
+import { pageTable, projectTable, userTable } from "../../database/schema";
 import { toPublicPage } from "../response";
 import { assertPageProjectAccess } from "./access";
 
@@ -91,7 +91,7 @@ async function updatePage(
 
   const [updated] = await db
     .update(pageTable)
-    .set({ ...patch, updatedAt: new Date() })
+    .set({ ...patch, updatedBy: userId, updatedAt: new Date() })
     .where(eq(pageTable.id, id))
     .returning();
 
@@ -99,7 +99,13 @@ async function updatePage(
     throw new HTTPException(404, { message: "Page not found" });
   }
 
-  return toPublicPage(updated);
+  const [editor] = await db
+    .select({ name: userTable.name })
+    .from(userTable)
+    .where(eq(userTable.id, userId))
+    .limit(1);
+
+  return toPublicPage({ ...updated, updatedByName: editor?.name ?? null });
 }
 
 export default updatePage;

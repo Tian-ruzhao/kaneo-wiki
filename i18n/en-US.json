@@ -3806,6 +3806,10 @@
 		"presence": {
 			"editing": "{{name}} is editing"
 		},
+		"meta": {
+			"edited": "{{name}} edited {{date}}",
+			"editedNoName": "Edited {{date}}"
+		},
 		"empty": {
 			"title": "No pages yet — create your first document",
 			"cta": "New page"

@@ -3820,6 +3820,10 @@
 			"alignLeft": "左对齐",
 			"alignCenter": "居中对齐",
 			"alignRight": "右对齐"
+		},
+		"meta": {
+			"edited": "{{name}} 于 {{date}} 修改",
+			"editedNoName": "{{date}} 修改"
 		}
 	}
 }

@@ -1,7 +1,7 @@
 import { asc, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
-import { pageTable, projectTable } from "../../database/schema";
+import { pageTable, projectTable, userTable } from "../../database/schema";
 import { toPublicPage } from "../response";
 import { assertPageProjectAccess } from "./access";
 
@@ -32,8 +32,11 @@ async function listPages(projectId: string, userId: string) {
       position: pageTable.position,
       createdAt: pageTable.createdAt,
       updatedAt: pageTable.updatedAt,
+      updatedBy: pageTable.updatedBy,
+      updatedByName: userTable.name,
     })
     .from(pageTable)
+    .leftJoin(userTable, eq(pageTable.updatedBy, userTable.id))
     .where(eq(pageTable.projectId, projectId))
     .orderBy(asc(pageTable.position), asc(pageTable.createdAt));
 
